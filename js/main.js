@@ -17,10 +17,20 @@ function addProduct (e)
 
     const productName = productNameInput.value;
     const productExpirationDate = productExpirationDateInput.value;
+
+    if (productName === '' || productExpirationDate === '')
+    {
+        return alert('Every input is required.');
+    }
+    else if (productName.length >= 16)
+    {
+        return alert('Product name must be no longer than 16 characters.');
+    }
+
     const product = new Product(productName, productExpirationDate);
 
     saveProductToLocalStorage(product);
-    addProductToHtml(product);
+    createHtmlProductList();
 }
 
 const productsContainer = document.querySelector('#products-container');
@@ -34,8 +44,6 @@ function removeProduct (e)
     {
         const productElement = e.target.parentElement.parentElement;
         const productID = productElement.getAttribute('data-id');
-        
-        productElement.remove();
 
         let productListString = localStorage.getItem('Products');
         let productList = JSON.parse(productListString);
@@ -52,6 +60,7 @@ function removeProduct (e)
         productListString = JSON.stringify(productList);
     
         localStorage.setItem('Products', productListString)
+        createHtmlProductList();
     }
 }
 
@@ -97,12 +106,7 @@ function addProductToHtml (productObj)
 
 function createHtmlProductList ()
 {
-    // 1. Get products from localStorage IF existing, else return false
-    // 2. Sort products by date 
-    // 2.1 Get expiration date in timestamp (product A)
-    // 2.2 Get expiration date in timestamp (product B)
-    // 2.3 Compare expiration dates 
-    // 3. Add them to HTML using addProductToHtml function
+    productsContainer.innerHTML = '';
 
     let productListString = localStorage.getItem('Products');
     if (productListString === null)
@@ -117,12 +121,12 @@ function createHtmlProductList ()
         let dateOne = new Date(productOne.expirationDate); 
         let dateTwo = new Date(productTwo.expirationDate);
 
-        if (dateOne.valueOf > dateTwo.valueOf) 
+        if (dateOne.getTime() < dateTwo.getTime()) 
         {
             // Sort productOne before productTwo
             return -1;
         }
-        else if (dateOne.valueOf < dateTwo.valueOf) 
+        else if (dateOne.getTime() > dateTwo.getTime()) 
         {
             // Sort productTwo before productOne
             return 1;
@@ -130,46 +134,15 @@ function createHtmlProductList ()
         else 
         {
             // Keep original order
-            return 0;
-        }
-    }
-
-    productList.sort(sortByDate);
-}
-
-function testFunction () 
-{
-    let productListString = localStorage.getItem('Products');
-    let productList = JSON.parse(productListString);
-
-    function sortByDate (productOne, productTwo) 
-    {
-        let dateOne = new Date(productOne.expirationDate); 
-        let dateTwo = new Date(productTwo.expirationDate);
-        console.log(dateOne.valueOf(), dateTwo.valueOf(), dateOne.valueOf > dateTwo.valueOf);
-
-        if (dateOne.valueOf < dateTwo.valueOf) 
-        {
-            // Sort productOne before productTwo
-            console.log('Sort productOne before productTwo')
-            return -1;
-        }
-        else if (dateOne.valueOf > dateTwo.valueOf) 
-        {
-            // Sort productTwo before productOne
-            console.log('Sort productTwo before productOne')
-            return 1;
-        }
-        else 
-        {
-            // Keep original order
-            console.log('Keep original order')
             return 0;
         }
     }
 
     const productListSorted = productList.sort(sortByDate);
-    console.log(productListSorted);
+
+    productListSorted.forEach((product) => {
+        addProductToHtml(product);
+    })
 }
 
-testFunction();
+createHtmlProductList();
