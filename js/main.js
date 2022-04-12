@@ -23,6 +23,38 @@ function addProduct (e)
     addProductToHtml(product);
 }
 
+const productsContainer = document.querySelector('#products-container');
+
+productSubmitButton.addEventListener('click', addProduct);
+productsContainer.addEventListener('click', removeProduct);
+
+function removeProduct (e)
+{
+    if (e.target.className === 'product-remove-icon')
+    {
+        const productElement = e.target.parentElement.parentElement;
+        const productID = productElement.getAttribute('data-id');
+        
+        productElement.remove();
+
+        let productListString = localStorage.getItem('Products');
+        let productList = JSON.parse(productListString);
+
+        function matchProductById (product)
+        {
+            return product.id == productID;
+        }
+
+        const productIndex = productList.findIndex(matchProductById);
+
+        productList.splice(productIndex, 1);
+
+        productListString = JSON.stringify(productList);
+    
+        localStorage.setItem('Products', productListString)
+    }
+}
+
 function saveProductToLocalStorage (productObj)
 {
     if (localStorage.getItem('Products') === null)
@@ -58,11 +90,86 @@ function addProductToHtml (productObj)
     </div>
 
     <div class="product-remove">
-        <img src="img/delete-button.png" alt="Delete button" height="24" width="24">
+        <img src="img/delete-button.png" class="product-remove-icon" alt="Delete button" height="24" width="24">
     </div>
     `
 }
 
-productSubmitButton.addEventListener('click', addProduct);
+function createHtmlProductList ()
+{
+    // 1. Get products from localStorage IF existing, else return false
+    // 2. Sort products by date 
+    // 2.1 Get expiration date in timestamp (product A)
+    // 2.2 Get expiration date in timestamp (product B)
+    // 2.3 Compare expiration dates 
+    // 3. Add them to HTML using addProductToHtml function
 
+    let productListString = localStorage.getItem('Products');
+    if (productListString === null)
+    {
+        return 'no products in localStorage';
+    }
 
+    let productList = JSON.parse(productListString);
+
+    function sortByDate (productOne, productTwo) 
+    {
+        let dateOne = new Date(productOne.expirationDate); 
+        let dateTwo = new Date(productTwo.expirationDate);
+
+        if (dateOne.valueOf > dateTwo.valueOf) 
+        {
+            // Sort productOne before productTwo
+            return -1;
+        }
+        else if (dateOne.valueOf < dateTwo.valueOf) 
+        {
+            // Sort productTwo before productOne
+            return 1;
+        }
+        else 
+        {
+            // Keep original order
+            return 0;
+        }
+    }
+
+    productList.sort(sortByDate);
+}
+
+function testFunction () 
+{
+    let productListString = localStorage.getItem('Products');
+    let productList = JSON.parse(productListString);
+
+    function sortByDate (productOne, productTwo) 
+    {
+        let dateOne = new Date(productOne.expirationDate); 
+        let dateTwo = new Date(productTwo.expirationDate);
+        console.log(dateOne.valueOf(), dateTwo.valueOf(), dateOne.valueOf > dateTwo.valueOf);
+
+        if (dateOne.valueOf < dateTwo.valueOf) 
+        {
+            // Sort productOne before productTwo
+            console.log('Sort productOne before productTwo')
+            return -1;
+        }
+        else if (dateOne.valueOf > dateTwo.valueOf) 
+        {
+            // Sort productTwo before productOne
+            console.log('Sort productTwo before productOne')
+            return 1;
+        }
+        else 
+        {
+            // Keep original order
+            console.log('Keep original order')
+            return 0;
+        }
+    }
+
+    const productListSorted = productList.sort(sortByDate);
+    console.log(productListSorted);
+}
+
+testFunction();

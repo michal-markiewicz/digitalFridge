@@ -75,6 +75,11 @@ form > input[type=submit]
     cursor: pointer;
 }
 
+.active 
+{
+    background-color: var(--primary-color) !important;
+}
+
 .product
 {
     display: flex;
